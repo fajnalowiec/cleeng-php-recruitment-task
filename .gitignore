@@ -17,6 +17,6 @@
 # IDE
 /.idea/
 /.vscode/
-/nbproject/private/
+/nbproject/*
 .aider*
 .env

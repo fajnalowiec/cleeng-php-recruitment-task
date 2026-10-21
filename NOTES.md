@@ -19,12 +19,13 @@
 - Documented required success and error responses from `openspec/specs/`.
 - Wrapped OpenAPI `content` values in `ArrayObject` to satisfy API Platform's model constructor.
 
-## What I'd do with more time
+## Summary
 
-- Add automated contract tests that assert the OpenAPI document contains every path, operation, and error response.
-- Add richer response schemas for success cases.
-- Expose the OpenAPI document at a stable discovery URL and version it.
-
-## Testing
-
-`make test` is green after adding the API Platform documentation resources.
+- Generally, I don't currently work in TDD, so I’d appreciate any feedback if I violated any specific practices of this approach.
+- All commits were made manually because I don't grant such permissions to the AI agent, and the rules required the TDD methodology to be reflected in the commit history.
+- The code still has flaws, such as missing authorization checks for resources, which I left unaddressed.
+- I only completed the tasks explicitly required in the README.md file, plus I added extra tests to cover the end-date calculation for newly created subscriptions to ensure the code fully complies with those scenario requirements.
+- I also skipped unit tests for the CancelService because this code is already fully covered by functional tests.
+- I didn't clean up the inconsistent naming conventions in the tests; in fact, I followed the existing pattern. I believe it would be better in the long run to group tests around resources rather than mixing resource-based and service-based groupings.
+- I’d be grateful if you could explain the rather unique approach to API documentation here because, AFAIK, this can be generated automatically. Is the goal to cover every single scenario manually?
+- I also don’t quite understand how you work with these spec.md files. It seems that the production code only covered 2 out of 4 scenarios thus the bug occured. In my opinion, a spec.md file should be atomic; 100% of its business logic and tests should be implemented within a single task, and only then should the completed task be merged into main branch

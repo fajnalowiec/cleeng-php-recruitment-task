@@ -7,6 +7,7 @@ namespace App\Tests\Functional;
 use App\Entity\Subscription;
 use App\Entity\SubscriptionStatus;
 use App\Exception\CannotCancelExpiredException;
+use App\Exception\SubscriptionNotFoundException;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Clock\MockClock;
 
@@ -81,6 +82,20 @@ final class CancelApiTest extends WebTestCase
         $expected = CannotCancelExpiredException::for($subscription->getId());
 
         $client->jsonRequest('POST', '/subscriptions/'.$subscription->getId().'/cancel');
+
+        self::assertResponseStatusCodeSame($expected->getHttpStatus());
+        self::assertSame($expected->getErrorCode(), $this->errorCode($client));
+        self::assertSame($expected->getMessage(), $this->errorMessage($client));
+    }
+
+    public function testCancelUnknownSubscription_Returns404WithErrorCode(): void
+    {
+        $client = self::createClient();
+
+        $unknownId = 999999;
+        $expected = SubscriptionNotFoundException::withId($unknownId);
+
+        $client->jsonRequest('POST', '/subscriptions/'.$unknownId.'/cancel');
 
         self::assertResponseStatusCodeSame($expected->getHttpStatus());
         self::assertSame($expected->getErrorCode(), $this->errorCode($client));

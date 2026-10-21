@@ -6,6 +6,7 @@ namespace App\Tests\Functional;
 
 use App\Entity\Subscription;
 use App\Entity\SubscriptionStatus;
+use App\Exception\CannotCancelExpiredException;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Clock\MockClock;
 
@@ -72,6 +73,20 @@ final class CancelApiTest extends WebTestCase
         self::assertSame($cancelledAt, $body['cancelledAt']);
     }
 
+    public function testCancelExpiredSubscription_Returns409WithErrorCode(): void
+    {
+        $client = self::createClient();
+
+        $subscription = $this->findSubscription(SubscriptionStatus::EXPIRED);
+        $expected = CannotCancelExpiredException::for($subscription->getId());
+
+        $client->jsonRequest('POST', '/subscriptions/'.$subscription->getId().'/cancel');
+
+        self::assertResponseStatusCodeSame($expected->getHttpStatus());
+        self::assertSame($expected->getErrorCode(), $this->errorCode($client));
+        self::assertSame($expected->getMessage(), $this->errorMessage($client));
+    }
+
     private function findSubscription(SubscriptionStatus $status): Subscription
     {
         $subscription = static::getContainer()->get('doctrine')
@@ -81,5 +96,20 @@ final class CancelApiTest extends WebTestCase
         self::assertNotNull($subscription);
 
         return $subscription;
+    }
+
+    private function errorCode(object $client): string
+    {
+        return $this->error($client)['code'];
+    }
+
+    private function errorMessage(object $client): string
+    {
+        return $this->error($client)['message'];
+    }
+
+    private function error(object $client): array
+    {
+        return json_decode($client->getResponse()->getContent(), true)['error'];
     }
 }

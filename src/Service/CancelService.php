@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Entity\Subscription;
 use App\Entity\SubscriptionStatus;
 use App\Exception\CannotCancelExpiredException;
+use App\Exception\SubscriptionNotFoundException;
 use App\Repository\SubscriptionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Clock\ClockInterface;
@@ -22,7 +23,8 @@ final class CancelService
 
     public function cancel(int $subscriptionId): Subscription
     {
-        $subscription = $this->subscriptions->find($subscriptionId);
+        $subscription = $this->subscriptions->find($subscriptionId)
+            ?? throw SubscriptionNotFoundException::withId($subscriptionId);
 
         if ($subscription->getStatus() === SubscriptionStatus::EXPIRED) {
             throw CannotCancelExpiredException::for($subscriptionId);

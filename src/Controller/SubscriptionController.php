@@ -10,6 +10,7 @@ use App\Http\CheckoutRequest;
 use App\Http\SubscriptionJson;
 use App\Repository\CustomerRepository;
 use App\Repository\OfferRepository;
+use App\Service\CancelService;
 use App\Service\CheckoutService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -21,6 +22,7 @@ final class SubscriptionController
         private readonly CustomerRepository $customers,
         private readonly OfferRepository $offers,
         private readonly CheckoutService $checkoutService,
+        private readonly CancelService $cancelService,
     ) {
     }
 
@@ -35,5 +37,13 @@ final class SubscriptionController
         $subscription = $this->checkoutService->checkout($customer, $offer);
 
         return new JsonResponse(SubscriptionJson::from($subscription), 201);
+    }
+
+    #[Route('/subscriptions/{id}/cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function cancel(int $id): JsonResponse
+    {
+        $subscription = $this->cancelService->cancel($id);
+
+        return new JsonResponse(SubscriptionJson::from($subscription));
     }
 }

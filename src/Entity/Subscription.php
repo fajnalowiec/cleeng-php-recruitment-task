@@ -51,6 +51,11 @@ class Subscription
         return $this->status;
     }
 
+    public function setStatus(SubscriptionStatus $status): void
+    {
+        $this->status = $status;
+    }
+
     public function getStartedAt(): \DateTimeImmutable
     {
         return $this->startedAt;
@@ -64,5 +69,10 @@ class Subscription
     public function getCancelledAt(): ?\DateTimeImmutable
     {
         return $this->cancelledAt;
+    }
+
+    public function setCancelledAt(?\DateTimeImmutable $cancelledAt): void
+    {
+        $this->cancelledAt = $cancelledAt;
     }
 }

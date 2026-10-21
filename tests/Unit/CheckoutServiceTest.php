@@ -33,6 +33,24 @@ final class CheckoutServiceTest extends TestCase
         self::assertSame('2027-03-15', $subscription->getExpiresAt()->format('Y-m-d'));
     }
 
+    public function testCheckout_SetsExpiryOnLastDayOfTargetMonth_whenMonthlyStartsOnMonthEnd(): void
+    {
+        $sut = $this->createSut('2026-01-31 12:00:00');
+
+        $subscription = $sut->checkout(new Customer('a@example.com'), $this->offer(BillingPeriod::P1M));
+
+        self::assertSame('2026-02-28', $subscription->getExpiresAt()->format('Y-m-d'));
+    }
+
+    public function testCheckout_SetsExpiryOnLastDayOfTargetMonth_whenYearlyStartsOnLeapDay(): void
+    {
+        $sut = $this->createSut('2028-02-29 12:00:00');
+
+        $subscription = $sut->checkout(new Customer('a@example.com'), $this->offer(BillingPeriod::P1Y));
+
+        self::assertSame('2029-02-28', $subscription->getExpiresAt()->format('Y-m-d'));
+    }
+
     public function testCheckout_SetsStartedAtToCurrentTime(): void
     {
         $sut = $this->createSut('2026-04-10 09:30:00');

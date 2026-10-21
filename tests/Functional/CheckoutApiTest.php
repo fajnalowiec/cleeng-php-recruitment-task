@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Clock\MockClock;
 
 final class CheckoutApiTest extends WebTestCase
 {
@@ -25,6 +26,24 @@ final class CheckoutApiTest extends WebTestCase
             new \DateTimeImmutable($body['startedAt']),
             new \DateTimeImmutable($body['expiresAt']),
         );
+    }
+
+    public function testBug001(): void
+    {
+        $client = self::createClient();
+        static::getContainer()->set('clock', new MockClock(
+            new \DateTimeImmutable('2026-08-31T10:00:00', new \DateTimeZone('UTC')),
+        ));
+
+        $client->jsonRequest('POST', '/subscriptions', [
+            'customerId' => $this->customerId($client, 'alice@example.com'),
+            'offerId' => $this->offerId($client, 'Monthly Pass'),
+        ]);
+
+        self::assertResponseStatusCodeSame(201);
+        $body = json_decode($client->getResponse()->getContent(), true);
+        self::assertSame('2026-08-31T10:00:00+00:00', $body['startedAt']);
+        self::assertSame('2026-09-30T10:00:00+00:00', $body['expiresAt']);
     }
 
     public function testCheckout_Returns404_whenCustomerUnknown(): void

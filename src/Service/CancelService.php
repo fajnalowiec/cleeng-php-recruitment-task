@@ -23,10 +23,11 @@ final class CancelService
     {
         $subscription = $this->subscriptions->find($subscriptionId);
 
-        $subscription->setStatus(SubscriptionStatus::CANCELLED);
-        $subscription->setCancelledAt($this->clock->now());
-
-        $this->entityManager->flush();
+        if ($subscription->getStatus() === SubscriptionStatus::ACTIVE) {
+            $subscription->setStatus(SubscriptionStatus::CANCELLED);
+            $subscription->setCancelledAt($this->clock->now());
+            $this->entityManager->flush();
+        }
 
         return $subscription;
     }
